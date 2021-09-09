@@ -2,7 +2,7 @@
 // compatible API routes.
 
 const express = require('express');
-const ParseServer = require('parse-server').ParseServer;
+const { default: ParseServer, ParseGraphQLServer } = require('parse-server');
 const path = require('path');
 const args = process.argv || [];
 const test = args.some(arg => arg.includes('jasmine'));
@@ -36,6 +36,15 @@ const mountPath = process.env.PARSE_MOUNT || '/parse';
 if (!test) {
   const api = new ParseServer(config);
   app.use(mountPath, api);
+  const parseGraphQLServer = new ParseGraphQLServer(
+    parseServer,
+    {
+      graphQLPath: '/graphql',
+      playgroundPath: '/playground'
+    }
+  );
+  parseGraphQLServer.applyGraphQL(app);
+  parseGraphQLServer.applyPlayground(app);
 }
 
 // Parse Server plays nicely with the rest of your web routes
